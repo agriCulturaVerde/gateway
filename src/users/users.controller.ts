@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Logger } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Logger, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateUserDto, UpdateUserDto } from './dto';
+import { AuthGuard } from 'src/auth/guards/auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -26,11 +27,21 @@ export class UsersController {
 
   }
 
+  @UseGuards(AuthGuard)
+  @Get()
+  findAll() {
+    return this.client.send(
+      'findAllUsers', {}
+
+    );
+
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.client.send(
       'updateUser',
-      { id, updateUserDto },
+      { id, ...updateUserDto },
     );
 
   }
